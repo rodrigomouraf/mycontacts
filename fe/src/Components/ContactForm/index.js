@@ -17,8 +17,6 @@ export default function ContactForm({ buttonLabel }) {
   const [category, setCategory] = useState('');
   const [errors, setErrors] = useState([]);
 
-  console.log(errors);
-
   function handleEmailChange(event) {
     setEmail(event.target.value);
 
@@ -31,11 +29,11 @@ export default function ContactForm({ buttonLabel }) {
 
       setErrors((prevState) => [
         ...prevState,
-        { field: 'email', error: 'E-mail inválido.' },
+        { field: 'email', message: 'E-mail inválido.' },
       ]);
     } else {
       setErrors((prevState) => (
-        prevState.filter((error) => error.field === 'email')
+        prevState.filter((error) => error.field !== 'email')
       ));
     }
   }
@@ -63,18 +61,32 @@ export default function ContactForm({ buttonLabel }) {
     });
   }
 
+  function getErrorMessageByFieldName(fieldName) {
+    return errors.find((error) => error.field === fieldName)?.message;
+  }
+
+  function getErrorMessageByFieldEmail(fieldEmail) {
+    return errors.find((error) => error.field === fieldEmail)?.message;
+  }
+
   return (
     <Form onSubmit={handleSubmit}>
-      <FormGroup>
+      <FormGroup
+        error={getErrorMessageByFieldName('name')}
+      >
         <Input
+          error={getErrorMessageByFieldName('name')}
           placeholder="Nome"
           value={name}
           onChange={handleNameChange}
         />
       </FormGroup>
 
-      <FormGroup>
+      <FormGroup
+        error={getErrorMessageByFieldEmail('email')}
+      >
         <Input
+          error={getErrorMessageByFieldEmail('email')}
           placeholder="E-mail"
           value={email}
           onChange={handleEmailChange}
