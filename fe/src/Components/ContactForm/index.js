@@ -1,13 +1,16 @@
 import PropType from 'prop-types';
 import { useState } from 'react';
 
+import isEmailValid from '../../utils/isEmailValid';
+import formatPhone from '../../utils/formatPhone';
+import UseErrors from '../../hooks/useErrors';
+
 import { ButtonContainer, Form } from './styles';
 
 import FormGroup from '../FormGroup';
 import Input from '../Input';
 import Select from '../Select';
 import Button from '../Button';
-import isEmailValid from '../../utils/isEmailValid';
 
 export default function ContactForm({ buttonLabel }) {
   // useState Controlled component
@@ -15,26 +18,22 @@ export default function ContactForm({ buttonLabel }) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [category, setCategory] = useState('');
-  const [errors, setErrors] = useState([]);
+  const {
+    errors,
+    setError,
+    removeError,
+    getErrorMessageByField,
+  } = UseErrors();
+
+  const isFormValid = name && errors.length === 0;
 
   function handleEmailChange(event) {
     setEmail(event.target.value);
 
     if (event.target.value && !isEmailValid(event.target.value)) {
-      const errorAlreadyExist = errors.find((error) => error.field === 'email');
-
-      if (errorAlreadyExist) {
-        return;
-      }
-
-      setErrors((prevState) => [
-        ...prevState,
-        { field: 'email', message: 'E-mail inválido.' },
-      ]);
+      setError({ field: 'email', message: 'E-mail inválido.' });
     } else {
-      setErrors((prevState) => (
-        prevState.filter((error) => error.field !== 'email')
-      ));
+      removeError('email');
     }
   }
 
@@ -42,51 +41,43 @@ export default function ContactForm({ buttonLabel }) {
     setName(event.target.value);
 
     if (!event.target.value) {
-      setErrors((prevState) => [
-        ...prevState,
-        { field: 'name', message: 'Nome é obrigatório.' },
-      ]);
+      setError({ field: 'name', message: 'Nome é obrigatório.' });
     } else {
-      setErrors((prevState) => prevState.filter(
-        (error) => error.field !== 'name',
-      ));
+      removeError('name');
     }
   }
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    console.log({
-      name, email, phone, category,
-    });
+    // console.log({
+    //   name, email, phone, category,
+    // });
   }
 
-  function getErrorMessageByFieldName(fieldName) {
-    return errors.find((error) => error.field === fieldName)?.message;
-  }
-
-  function getErrorMessageByFieldEmail(fieldEmail) {
-    return errors.find((error) => error.field === fieldEmail)?.message;
+  function handlePhoneNumber(event) {
+    setPhone(formatPhone(event.target.value));
   }
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} noValidate>
       <FormGroup
-        error={getErrorMessageByFieldName('name')}
+        error={getErrorMessageByField('name')}
       >
         <Input
-          error={getErrorMessageByFieldName('name')}
-          placeholder="Nome"
+          error={getErrorMessageByField('name')}
+          placeholder="Nome *"
           value={name}
           onChange={handleNameChange}
         />
       </FormGroup>
 
       <FormGroup
-        error={getErrorMessageByFieldEmail('email')}
+        error={getErrorMessageByField('email')}
       >
         <Input
-          error={getErrorMessageByFieldEmail('email')}
+          type="email"
+          error={getErrorMessageByField('email')}
           placeholder="E-mail"
           value={email}
           onChange={handleEmailChange}
@@ -97,7 +88,8 @@ export default function ContactForm({ buttonLabel }) {
         <Input
           placeholder="Telefone"
           value={phone}
-          onChange={(event) => setPhone(event.target.value)}
+          onChange={handlePhoneNumber}
+          maxLength={15}
         />
       </FormGroup>
 
@@ -113,7 +105,7 @@ export default function ContactForm({ buttonLabel }) {
       </FormGroup>
 
       <ButtonContainer>
-        <Button type="submit">
+        <Button type="submit" disabled={!isFormValid}>
           {buttonLabel}
         </Button>
       </ButtonContainer>
