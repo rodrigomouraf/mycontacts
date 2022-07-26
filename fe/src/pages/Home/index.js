@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
 
 import {
-  Container, InputSearchContainer, Header, ListContainer, Card,
+  Container, InputSearchContainer, Header, ListHeader, Card,
 } from './styles';
 
 import arrow from '../../assets/images/icons/arrow.svg';
@@ -9,6 +11,26 @@ import trash from '../../assets/images/icons/trash.svg';
 import edit from '../../assets/images/icons/edit.svg';
 
 export default function Home() {
+  const [contacts, setContacts] = useState([]);
+  const [orderBy, setOrderBy] = useState('asc');
+
+  useEffect(() => {
+    fetch(`http://localhost:3001/contacts?orderBy=${orderBy}`)
+      .then(async (response) => {
+        const json = await response.json();
+        setContacts(json);
+      })
+      .catch((error) => {
+        console.log('erro', error);
+      });
+  }, [orderBy]);
+
+  function handleToggleOrderBy() {
+    setOrderBy(
+      (prevState) => (prevState === 'asc' ? 'desc' : 'asc'),
+    );
+  }
+
   return (
     <Container>
       <InputSearchContainer>
@@ -16,29 +38,38 @@ export default function Home() {
       </InputSearchContainer>
 
       <Header>
-        <strong>3 contatos</strong>
+        <strong>
+          {contacts.length}
+          {' '}
+          {contacts.length === 1 ? ' contato' : ' contatos'}
+        </strong>
         <Link to="/new">Novo contato</Link>
       </Header>
-      <ListContainer>
+
+      <ListHeader orderBy={orderBy}>
         <header>
-          <button type="button">
+          <button type="button" onClick={handleToggleOrderBy}>
             <span>Nome</span>
             <img src={arrow} alt="Arrow" />
           </button>
         </header>
+      </ListHeader>
 
-        <Card>
+      {contacts.map((contact) => (
+        <Card key={contact.id}>
           <div className="info">
             <div className="contact-name">
-              <strong>Rodrigo Moura</strong>
-              <small>instagram</small>
+              <strong>{contact.name}</strong>
+              {contact.category_name && (
+                <small>contact.category_name</small>
+              )}
             </div>
-            <span>rodrigomoura_rm@hotmail.com</span>
-            <span>(41) 99999-9999</span>
+            <span>{contact.email}</span>
+            <span>{contact.phone}</span>
           </div>
 
           <div className="actions">
-            <Link to="/edit/123">
+            <Link to={`/edit/${contact.id}`}>
               <img src={trash} alt="Edit" />
             </Link>
             <button type="button">
@@ -46,16 +77,7 @@ export default function Home() {
             </button>
           </div>
         </Card>
-
-      </ListContainer>
+      ))}
     </Container>
   );
 }
-
-fetch('http://localhost:3001/contacts')
-  .then((response) => {
-    console.log('response', response);
-  })
-  .catch((error) => {
-    console.log('erro', error);
-  });
