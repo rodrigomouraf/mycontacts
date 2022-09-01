@@ -5,7 +5,8 @@
     },
     "extends": [
         "plugin:react/recommended",
-        "airbnb"
+        "airbnb",
+        "plugin:react-hooks/recommended"
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -15,7 +16,8 @@
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "react-hooks"
     ],
     "rules": {
         "react/jsx-filename-extension": [1, {"extensions": [".js", ".jsx"]}],
@@ -23,6 +25,9 @@
         "linebreak-style": "off",
         "import/prefer-default-export": "off",
         "react/jsx-no-undef": "off",
-        "react/jsx-no-bind": "off"
+        "react/jsx-no-bind": "off",
+        "no-promise-executor-return": "off",
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn"
     }
 }
