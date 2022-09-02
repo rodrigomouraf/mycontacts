@@ -8,11 +8,10 @@ import {
 
 import Loader from '../../Components/Loader';
 
-// import delay from '../../utils/delay';
-
 import arrow from '../../assets/images/icons/arrow.svg';
 import trash from '../../assets/images/icons/trash.svg';
 import edit from '../../assets/images/icons/edit.svg';
+import ContactsServices from '../../services/ContactsServices';
 
 export default function Home() {
   const [contacts, setContacts] = useState([]);
@@ -22,15 +21,14 @@ export default function Home() {
 
   const filteredContacts = useMemo(() => contacts.filter((contact) => (
     contact.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ), [contacts, searchTerm]));
-
+  )), [contacts, searchTerm]);
+  console.log(filteredContacts.length);
   useEffect(() => {
     async function loadContacts() {
-      setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:3001/contacts?orderBy=${orderBy}`);
-        const json = await response.json();
-        setContacts(json);
+        setIsLoading(true);
+        const contactsList = await ContactsServices.listContacts(orderBy);
+        setContacts(contactsList);
       } catch (error) {
         console.log('Error', error);
       } finally {
@@ -74,14 +72,14 @@ export default function Home() {
       </Header>
 
       {filteredContacts.length > 0 && (
-      <ListHeader orderBy={orderBy}>
-        <header>
-          <button type="button" onClick={handleToggleOrderBy}>
-            <span>Nome</span>
-            <img src={arrow} alt="Arrow" />
-          </button>
-        </header>
-      </ListHeader>
+        <ListHeader orderBy={orderBy}>
+          <header>
+            <button type="button" onClick={handleToggleOrderBy}>
+              <span>Nome</span>
+              <img src={arrow} alt="Arrow" />
+            </button>
+          </header>
+        </ListHeader>
       )}
 
       {filteredContacts.map((contact) => (
